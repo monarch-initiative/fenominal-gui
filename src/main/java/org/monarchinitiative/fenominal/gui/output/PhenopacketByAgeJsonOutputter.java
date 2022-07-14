@@ -2,12 +2,6 @@ package org.monarchinitiative.fenominal.gui.output;
 
 //import com.fasterxml.jackson.annotation.JsonFormat;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
 
 
@@ -99,24 +93,22 @@ public record PhenopacketByAgeJsonOutputter(PhenopacketByAgeModel phenopacketMod
             PhenotypicFeature pf;
             if (fterm.isObserved() && fterm.hasAge()) {
                 pf = PhenotypicFeatureBuilder
-                        .builder(term.getId().getValue(), term.getName())
+                        .builder(term.id().getValue(), term.getName())
                         .onset(TimeElements.age(fterm.getIso8601Age()))
                         .build();
             } else if (fterm.hasAge()) {
                 pf = PhenotypicFeatureBuilder
-                        .builder(term.getId().getValue(), term.getName())
+                        .builder(term.id().getValue(), term.getName())
                         .onset(TimeElements.age(fterm.getIso8601Age()))
                         .excluded()
                         .build();
             } else if (fterm.isObserved()) {
                 pf = PhenotypicFeatureBuilder
-
-                        .builder(term.getId().getValue(), term.getName())
+                        .builder(term.id().getValue(), term.getName())
                         .build();
             } else {
                 pf = PhenotypicFeatureBuilder
-                        .builder(term.getId().getValue(), term.getName())
-
+                        .builder(term.id().getValue(), term.getName())
                         .excluded()
                         .build();
             }

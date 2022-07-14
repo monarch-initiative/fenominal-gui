@@ -52,8 +52,7 @@ public class PatientSexAndIdDialog {
             return null;
         });
 
-        Optional<PatientSexAndId> result = dialog.showAndWait();
-        return result;
+        return dialog.showAndWait();
     }
 
 

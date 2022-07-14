@@ -3,13 +3,6 @@ package org.monarchinitiative.fenominal.gui.output;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.JsonFormat;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import com.google.protobuf.Message;
-
 
 import org.monarchinitiative.fenominal.gui.model.FenominalTerm;
 import org.monarchinitiative.fenominal.gui.model.PhenopacketModel;
@@ -96,24 +89,24 @@ public record PhenopacketJsonOutputter(PhenopacketModel phenopacketModel) implem
             if (fenominalTerm.hasAge() && observed) {
                 String isoAge = fenominalTerm.getIso8601Age();
                 pf = PhenotypicFeatureBuilder
-                        .builder(term.getId().getValue(), term.getName())
+                        .builder(term.id().getValue(), term.getName())
                         .onset(TimeElements.age(isoAge))
                         .build();
             } else if (fenominalTerm.hasAge() ){
                 String isoAge = fenominalTerm.getIso8601Age();
                 pf = PhenotypicFeatureBuilder
-                        .builder(term.getId().getValue(), term.getName())
+                        .builder(term.id().getValue(), term.getName())
                         .onset(TimeElements.age(isoAge))
                         .excluded()
                         .build();
             } else if (observed) {
                 pf = PhenotypicFeatureBuilder
 
-                        .builder(term.getId().getValue(), term.getName())
+                        .builder(term.id().getValue(), term.getName())
                         .build();
             } else {
                 pf = PhenotypicFeatureBuilder
-                        .builder(term.getId().getValue(), term.getName())
+                        .builder(term.id().getValue(), term.getName())
                         .excluded()
                         .build();
             }

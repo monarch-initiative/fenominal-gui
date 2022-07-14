@@ -34,9 +34,7 @@ import org.monarchinitiative.fenominal.gui.output.*;
 import org.monarchinitiative.fenominal.gui.questionnaire.PhenoQuestionnaire;
 import org.monarchinitiative.fenominal.gui.questionnaire.QuestionnairePane;
 import org.monarchinitiative.fenominal.gui.questionnaire.phenoitem.PhenoAnswer;
-import org.monarchinitiative.phenol.base.PhenolRuntimeException;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
-import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -205,7 +203,7 @@ public class FenominalMainController {
         FenominalMinerApp fenominalMiner = new FenominalMinerApp(ontology);
         HpoTextMining hpoTextMining = HpoTextMining.builder()
                 .withExecutorService(executor)
-                .withOntology(fenominalMiner.getHpo())
+                .withOntology(fenominalMiner.getPhenotypicAbnormalityOntology())
                 .withTermMiner(fenominalMiner)
                 .build();
         // get reference to primary stage

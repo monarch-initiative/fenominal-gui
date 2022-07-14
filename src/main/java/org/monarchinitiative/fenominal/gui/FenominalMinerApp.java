@@ -9,6 +9,7 @@ import org.monarchinitiative.fenominal.core.SimpleMinedTerm;
 
 
 import org.monarchinitiative.phenol.ontology.data.Ontology;
+import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,14 +18,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class FenominalMinerApp implements TermMiner {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(FenominalMinerApp.class);
+    private static final TermId PHENOTYPIC_ABNORMALITY = TermId.of("HP:0000118");
     private final ClinicalTextMapper mapper;
 
     private final Ontology ontology;
 
+
+    private final Ontology phenotypicAbnormalityOntology;
+
     public FenominalMinerApp(Ontology ontology) {
         this.ontology = ontology;
+        this.phenotypicAbnormalityOntology = ontology.subOntology(PHENOTYPIC_ABNORMALITY);
         LexicalResources lexicalResources = new LexicalResources();
         this.mapper = new ClinicalTextMapper(ontology, lexicalResources);
     }
@@ -50,6 +55,10 @@ public class FenominalMinerApp implements TermMiner {
 
     public Ontology getHpo() {
         return this.ontology;
+    }
+
+    public Ontology getPhenotypicAbnormalityOntology() {
+        return this.phenotypicAbnormalityOntology;
     }
 
 

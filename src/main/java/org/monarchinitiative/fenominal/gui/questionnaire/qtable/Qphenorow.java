@@ -7,8 +7,6 @@ import javafx.beans.property.StringProperty;
 import org.monarchinitiative.fenominal.gui.questionnaire.phenoitem.*;
 import org.monarchinitiative.phenol.ontology.data.Term;
 
-import java.util.Optional;
-
 public class Qphenorow {
 
     private final StringProperty title;
