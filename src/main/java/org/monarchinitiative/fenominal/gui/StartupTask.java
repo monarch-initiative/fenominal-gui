@@ -62,28 +62,21 @@ public final class StartupTask extends Task<Void> {
             throw new FenominalRunTimeException("Could not find application home directory");
         }
         String ontologyPath = this.appHomeDir.getAbsolutePath() + File.separator + "hp.json";
-        if (ontologyPath != null) {
-            final File hpJsonFile = new File(ontologyPath);
-            if (hpJsonFile.isFile()) {
-                String msg = String.format("Loading HPO from file '%s'", hpJsonFile.getAbsoluteFile());
-                updateMessage(msg);
-                LOGGER.info(msg);
-                try {
-                final Ontology ontology = OntologyLoader.loadOntology(new File(ontologyPath));
-                optionalResources.setOntology(ontology);
-                updateMessage("Ontology loaded");
-                } catch (FenominalRunTimeException e) {
-                    updateMessage(String.format("Error loading HPO file : %s", e.getMessage()));
-                    LOGGER.warn("Error loading HPO file: ", e);
-                    optionalResources.setOntology(null);
-                }
-            } else {
+        final File hpJsonFile = new File(ontologyPath);
+        if (hpJsonFile.isFile()) {
+            String msg = String.format("Loading HPO from file '%s'", hpJsonFile.getAbsoluteFile());
+            updateMessage(msg);
+            LOGGER.info(msg);
+            try {
+            final Ontology ontology = OntologyLoader.loadOntology(new File(ontologyPath));
+            optionalResources.setOntology(ontology);
+            updateMessage("Ontology loaded");
+            } catch (FenominalRunTimeException e) {
+                updateMessage(String.format("Error loading HPO file : %s", e.getMessage()));
+                LOGGER.warn("Error loading HPO file: ", e);
                 optionalResources.setOntology(null);
             }
         } else {
-            String msg = "Need to set path to hp.obo file (See edit menu)";
-            updateMessage(msg);
-            LOGGER.info(msg);
             optionalResources.setOntology(null);
         }
         return null;

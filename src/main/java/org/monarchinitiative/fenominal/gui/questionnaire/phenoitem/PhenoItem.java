@@ -2,8 +2,6 @@ package org.monarchinitiative.fenominal.gui.questionnaire.phenoitem;
 
 import org.monarchinitiative.phenol.ontology.data.Term;
 
-import java.util.Optional;
-
 /**
  * This represents a question about a Phenotypic Abnormality that will be
  * transformed into a single table row and presented to the User.

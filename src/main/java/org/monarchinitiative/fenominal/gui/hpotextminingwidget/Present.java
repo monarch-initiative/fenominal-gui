@@ -130,18 +130,18 @@ public class Present {
     /**
      * Observable Checkboxes corresponding to identified <em>YES</em> HPO terms.
      */
-    private ObservableSet<PhenotypeTerm> yesTerms = FXCollections.observableSet();
+    private final ObservableSet<PhenotypeTerm> yesTerms = FXCollections.observableSet();
 
     /**
      * Observable Checkboxes corresponding to identified <em>NOT</em> HPO terms.
      */
-    private ObservableSet<PhenotypeTerm> notTerms = FXCollections.observableSet();
+    private final ObservableSet<PhenotypeTerm> notTerms = FXCollections.observableSet();
 
     /**
      * Tracks the selection state of all terms. Note: use Term rather than PhenotypeTerm as the latter could mutate
      * its negation term.
      */
-    private ObservableSet<Term> checkBoxesState = FXCollections.observableSet();
+    private final ObservableSet<Term> checkBoxesState = FXCollections.observableSet();
 
 
     /**
