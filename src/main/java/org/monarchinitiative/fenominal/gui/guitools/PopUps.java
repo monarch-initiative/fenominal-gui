@@ -35,7 +35,6 @@ import javafx.scene.web.WebView;
 import javafx.stage.*;
 
 import java.io.File;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;

@@ -1,6 +1,5 @@
 package org.monarchinitiative.fenominal.gui.output;
 
-import org.monarchinitiative.fenominal.gui.model.AbstractPhenopacketModel;
 import org.monarchinitiative.fenominal.gui.model.PhenopacketModel;
 
 public abstract class AbstractPhenopacketOutputter {

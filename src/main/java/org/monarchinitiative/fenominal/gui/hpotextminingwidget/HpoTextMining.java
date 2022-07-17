@@ -138,13 +138,13 @@ public class HpoTextMining {
             URL url = HpoTextMining.class.getResource("/fxml/HpoTextMiningMain.fxml");
             FXMLLoader mainLoader = new FXMLLoader(url);
             mainLoader.setClassLoader(HpoTextMining.class.getClassLoader());
-            File f = new File(url.getFile());
+            File f = new File(Objects.requireNonNull(url).getFile());
             LOGGER.info("Resource for HpoTextMiningMain.fxml: {} - exists? {}", url, f.isFile());
             mainLoader.setControllerFactory(controllerFactory);
             mainParent = mainLoader.load();
 
             url = HpoTextMining.class.getResource("/fxml/Configure.fxml");
-            f = new File(url.getFile());
+            f = new File(Objects.requireNonNull(url).getFile());
             LOGGER.info("Resource for Configure.fxml: {} - exists? {}", url, f.isFile());
             FXMLLoader configureLoader = new FXMLLoader(url);
             configureLoader.setClassLoader(HpoTextMining.class.getClassLoader());
@@ -153,7 +153,7 @@ public class HpoTextMining {
             main.setTextMiningContent(configureAnchorPane);
 
             url = HpoTextMining.class.getResource("/fxml/Present.fxml");
-            f = new File(url.getFile());
+            f = new File(Objects.requireNonNull(url).getFile());
             LOGGER.info("Resource for Present.fxml: {} - exists? {}", url, f.isFile());
             FXMLLoader presentLoader = new FXMLLoader(url);
             presentLoader.setClassLoader(HpoTextMining.class.getClassLoader());
@@ -161,7 +161,7 @@ public class HpoTextMining {
             presentVBox = presentLoader.load();
 
             url = HpoTextMining.class.getResource("/fxml/OntologyTree.fxml");
-            f = new File(url.getFile());
+            f = new File(Objects.requireNonNull(url).getFile());
             LOGGER.info("Resource for OntologyTree.fxml: {} - exists? {}", url, f.isFile());
             FXMLLoader ontologyTreeLoader = new FXMLLoader(url);
             ontologyTreeLoader.setClassLoader(HpoTextMining.class.getClassLoader());

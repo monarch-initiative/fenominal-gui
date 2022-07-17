@@ -382,16 +382,13 @@ public class FenominalMainController {
         if (opt.isPresent()) {
             ButtonType btype = opt.get();
             switch (btype.getText()) {
-                case "Phenopacket":
-                    initPhenopacket();
-                    break;
-                case "Phenopacket (by age at encounter)":
-                    initPhenopacketWithManualAge();
-                    break;
-                case "Phenopacket (one encounter, no age)":
-                    initPhenopacketNoAge();
-                    break;
-                case "Cancel":
+                case "Phenopacket" -> initPhenopacket();
+                case "Phenopacket (by age at encounter)" -> initPhenopacketWithManualAge();
+                case "Phenopacket (one encounter, no age)"-> initPhenopacketNoAge();
+                case "Update Existing Phenopacket" -> updatePhenopacket(e);
+                case "Cancel" -> {
+                    LOGGER.trace("Canceled operation");
+                }
             }
             // If we are here, then we are starting a new Phenopacket and
             // we should not offer the update option.
