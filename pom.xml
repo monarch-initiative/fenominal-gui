@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.monarchinitiative.fenominal</groupId>
-    <version>0.5.3</version>
+    <version>0.6.0</version>
     <artifactId>fenominal-gui</artifactId>
 
     <properties>
@@ -27,7 +27,7 @@
         <jackson.fasterxml.version>2.13.3</jackson.fasterxml.version>
         <slf4j.version>1.7.30</slf4j.version>
         <commons.io>2.8.0</commons.io>
-        <fenominal.version>0.6.1</fenominal.version>
+        <fenominal.version>0.7.6</fenominal.version>
     </properties>
 
     <prerequisites>

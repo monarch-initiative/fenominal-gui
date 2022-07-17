@@ -20,7 +20,7 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.controlsfx.dialog.CommandLinksDialog;
 import org.monarchinitiative.fenominal.core.FenominalRunTimeException;
-import org.monarchinitiative.fenominal.gui.FenominalMinerApp;
+import org.monarchinitiative.fenominal.core.TermMiner;
 import org.monarchinitiative.fenominal.gui.OptionalResources;
 import org.monarchinitiative.fenominal.gui.StartupTask;
 import org.monarchinitiative.fenominal.gui.config.ApplicationProperties;
@@ -35,6 +35,7 @@ import org.monarchinitiative.fenominal.gui.questionnaire.PhenoQuestionnaire;
 import org.monarchinitiative.fenominal.gui.questionnaire.QuestionnairePane;
 import org.monarchinitiative.fenominal.gui.questionnaire.phenoitem.PhenoAnswer;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
+import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,6 +84,8 @@ public class FenominalMainController {
     private final ExecutorService executor;
 
     private final OptionalResources optionalResources;
+
+    private final static TermId PHENOTYPIC_ABNORMALITY = TermId.of("HP:0000118");
 
     private final Properties pgProperties;
 
@@ -184,6 +187,7 @@ public class FenominalMainController {
             PopUps.showInfoMessage("Need to set location to hp.json ontology file first! (See edit menu)", "Error");
             return;
         }
+        Ontology phenotypicAbnSubontology = ontology.subOntology(PHENOTYPIC_ABNORMALITY);
         LocalDate encounterDate = null;
         String isoAge = null;
         if (this.miningTaskType == PHENOPACKET) {
@@ -200,11 +204,12 @@ public class FenominalMainController {
             AgePickerDialog agePickerDialog = new AgePickerDialog(pAgeModel.getEncounterAges());
             isoAge = agePickerDialog.showAgePickerDialog();
         }
-        FenominalMinerApp fenominalMiner = new FenominalMinerApp(ontology);
+        //FenominalMinerApp fenominalMiner = new FenominalMinerApp(ontology);
+        TermMiner exactMiner = TermMiner.defaultNonFuzzyMapper(ontology);
         HpoTextMining hpoTextMining = HpoTextMining.builder()
                 .withExecutorService(executor)
-                .withOntology(fenominalMiner.getPhenotypicAbnormalityOntology())
-                .withTermMiner(fenominalMiner)
+                .withOntology(phenotypicAbnSubontology)
+                .withTermMiner(exactMiner)
                 .build();
         // get reference to primary stage
         Window w = this.parseButton.getScene().getWindow();
