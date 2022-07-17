@@ -15,7 +15,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
-import javax.swing.*;
+//import javax.swing.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -61,7 +61,7 @@ public class StageInitializer implements ApplicationListener<FenominalApplicatio
             try {
                 URL iconURL = StageInitializer.class.getResource("/img/phenomenon.png");
                 if (iconURL == null) return Optional.empty();
-                java.awt.Image macimage = new ImageIcon(iconURL).getImage();
+                //java.awt.Image macimage = new ImageIcon(iconURL).getImage();
                 // not working, need replacement for Java 17
                 //com.apple.eawt.Application.getApplication().setDockIconImage(macimage);
             } catch (Exception e) {
