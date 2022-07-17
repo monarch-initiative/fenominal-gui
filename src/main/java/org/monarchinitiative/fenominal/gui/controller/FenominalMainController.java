@@ -61,14 +61,9 @@ public class FenominalMainController {
     @FXML
     public Button setupButton;
     @FXML
-    private Button updatePhenopacketButton;
-
-    @FXML
     private Button previwButton;
-
     @FXML
     public Label hpoReadyLabel;
-
     @FXML
     public TableView metaDataTableView;
     /**
@@ -386,13 +381,8 @@ public class FenominalMainController {
                 case "Phenopacket (by age at encounter)" -> initPhenopacketWithManualAge();
                 case "Phenopacket (one encounter, no age)"-> initPhenopacketNoAge();
                 case "Update Existing Phenopacket" -> updatePhenopacket(e);
-                case "Cancel" -> {
-                    LOGGER.trace("Canceled operation");
-                }
+                case "Cancel" -> LOGGER.trace("Canceled operation");
             }
-            // If we are here, then we are starting a new Phenopacket and
-            // we should not offer the update option.
-            this.updatePhenopacketButton.setDisable(true);
         }
         String biocurator = this.pgProperties.getProperty(BIOCURATOR_ID_PROPERTY);
         if (biocurator != null && model != null) {
@@ -582,8 +572,6 @@ public class FenominalMainController {
         if (biocurator != null) {
             this.model.setModelDataItem(BIOCURATOR_ID_PROPERTY, biocurator);
         }
-        // We can only update a phenopacket once, so now disable the button
-        this.updatePhenopacketButton.setDisable(true);
         actionEvent.consume();
     }
 
