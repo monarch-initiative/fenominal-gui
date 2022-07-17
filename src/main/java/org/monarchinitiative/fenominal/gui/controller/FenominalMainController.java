@@ -444,6 +444,7 @@ public class FenominalMainController {
             switch (this.miningTaskType) {
                 case PHENOPACKET -> phenoOutputter = new PhenopacketJsonOutputter((PhenopacketModel) this.model);
                 case PHENOPACKET_BY_AGE -> phenoOutputter = new PhenopacketByAgeJsonOutputter((PhenopacketByAgeModel) this.model);
+                case PHENOPACKET_NO_AGE -> phenoOutputter = new PhenopacketNoAgeJsonOutputter((PhenopacketNoAgeModel) this.model);
                 default -> phenoOutputter = new ErrorOutputter();
             }
             phenoOutputter.output(writer);
@@ -461,6 +462,7 @@ public class FenominalMainController {
         phenoOutputter = switch (this.miningTaskType) {
             case PHENOPACKET -> new PhenopacketJsonOutputter((PhenopacketModel) this.model);
             case PHENOPACKET_BY_AGE -> new PhenopacketByAgeJsonOutputter((PhenopacketByAgeModel) this.model);
+            case PHENOPACKET_NO_AGE -> new PhenopacketNoAgeJsonOutputter((PhenopacketNoAgeModel) this.model);
             default -> new ErrorOutputter();
         };
         try {
