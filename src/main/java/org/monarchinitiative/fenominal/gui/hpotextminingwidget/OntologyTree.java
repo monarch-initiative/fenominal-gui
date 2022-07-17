@@ -223,7 +223,7 @@ public class OntologyTree {
             // find root -> term path through the tree
             Stack<Term> termStack = new Stack<>();
             termStack.add(term);
-            Set<TermId> parents = ontology.getParentTermIds(term.id()); //getTermParents(term);
+            Set<TermId> parents = ontology.getParentTermIds(term.id());
             while (parents.size() != 0) {
                 TermId parent = parents.iterator().next();
                 termStack.add(ontology.getTermMap().get(parent));
@@ -326,7 +326,9 @@ public class OntologyTree {
          */
         @Override
         public boolean isLeaf() {
-            return OntologyAlgorithm.getChildTerms(ontology, getValue().id(), false).size() == 0;
+            return OntologyAlgorithm
+                    .getChildTerms(ontology, getValue().id(), false)
+                    .isEmpty();
         }
 
 
