@@ -133,8 +133,6 @@ public class HpoTextMining {
                 return null;
             }
         };
-
-//
         try {
 
             URL url = HpoTextMining.class.getResource("/fxml/HpoTextMiningMain.fxml");

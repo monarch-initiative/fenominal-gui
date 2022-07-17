@@ -268,7 +268,7 @@ public class FenominalMainController {
 
     private void parsePhenopacketNoAge(Set<PhenotypeTerm> approved) {
         List<FenominalTerm> approvedTerms = approved.stream()
-                .map(pterm -> FenominalTerm.fromMainPhenotypeTermNoAge(pterm))
+                .map(FenominalTerm::fromMainPhenotypeTermNoAge)
                 .sorted()
                 .collect(Collectors.toList());
         model.addHpoFeatures(approvedTerms);
