@@ -37,6 +37,7 @@ import javafx.stage.*;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -231,8 +232,10 @@ public class PopUps {
 
         WebView browser = new WebView();
         WebEngine engine = browser.getEngine();
-        engine.load(PopUps.class.getResource(resourcePath).toString());
-
+        URL url = PopUps.class.getResource(resourcePath);
+        if (url != null) {
+            engine.load(url.toString());
+        }
         adjWindow.setScene(new Scene(browser));
         adjWindow.showAndWait();
 

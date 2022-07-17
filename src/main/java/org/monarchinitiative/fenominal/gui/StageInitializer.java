@@ -60,9 +60,10 @@ public class StageInitializer implements ApplicationListener<FenominalApplicatio
         if (Platform.isMacintosh()) {
             try {
                 URL iconURL = StageInitializer.class.getResource("/img/phenomenon.png");
+                if (iconURL == null) return Optional.empty();
                 java.awt.Image macimage = new ImageIcon(iconURL).getImage();
-                // not working
-                // com.apple.eawt.Application.getApplication().setDockIconImage(macimage);
+                // not working, need replacement for Java 17
+                //com.apple.eawt.Application.getApplication().setDockIconImage(macimage);
             } catch (Exception e) {
                 // Won't work on Windows or Linux. Just skip it!
             }

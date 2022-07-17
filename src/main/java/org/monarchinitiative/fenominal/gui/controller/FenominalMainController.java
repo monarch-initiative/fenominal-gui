@@ -61,14 +61,9 @@ public class FenominalMainController {
     @FXML
     public Button setupButton;
     @FXML
-    private Button updatePhenopacketButton;
-
-    @FXML
     private Button previwButton;
-
     @FXML
     public Label hpoReadyLabel;
-
     @FXML
     public TableView metaDataTableView;
     /**
@@ -218,40 +213,60 @@ public class FenominalMainController {
 
         Set<PhenotypeTerm> approved = hpoTextMining.getApprovedTerms();
 
-        if (miningTaskType.equals(PHENOPACKET)) {
-            PhenopacketModel pmodel = (PhenopacketModel) this.model;
-            Optional<LocalDate> bdateOpt = pmodel.getBirthdate();
-            if (bdateOpt.isEmpty()) {
-                PopUps.showInfoMessage("Error", "Cannot add phenotypes without initializing birthdate");
+        switch (miningTaskType) {
+            case PHENOPACKET -> parsePhenopacket(encounterDate, approved);
+            case PHENOPACKET_BY_AGE -> parsePhenopacketByAge(isoAge, approved);
+            case PHENOPACKET_NO_AGE -> parsePhenopacketNoAge(approved);
+            default -> {
+                PopUps.showInfoMessage("Error, mining task not implemented yet", "Error");
                 return;
             }
-            Period age = getAge(bdateOpt.get(), encounterDate);
-            List<FenominalTerm> approvedTerms = approved.stream()
-                    .map(pterm -> FenominalTerm.fromMainPhenotypeTermWithAge(pterm, age))
-                    .sorted()
-                    .collect(Collectors.toList());
-            pmodel.addHpoFeatures(approvedTerms);
-            int encountersSoFar = pmodel.casesMined();
-            this.parseButton.setText(String.format("Mine encounter %d", encountersSoFar + 1));
-        } else if (miningTaskType.equals(PHENOPACKET_BY_AGE)) {
-            Period agePeriod = Period.parse(isoAge);
-            List<FenominalTerm> approvedTerms = approved.stream()
-                    .map(pterm -> FenominalTerm.fromMainPhenotypeTermWithIsoAge(pterm, agePeriod))
-                    .sorted()
-                    .collect(Collectors.toList());
-            model.addHpoFeatures(approvedTerms);
-            int encountersSoFar = model.casesMined();
-            this.parseButton.setText(String.format("Mine encounter %d", encountersSoFar + 1));
-        } else {
-            PopUps.showInfoMessage("Error, mining task not implemented yet", "Error");
-            return;
         }
+
+
 
         updateTable();
         // if we get here, we have data that could be output
         this.previwButton.setDisable(false);
         this.outputButton.setDisable(false);
         e.consume();
+    }
+
+
+    private void parsePhenopacket(LocalDate encounterDate, Set<PhenotypeTerm> approved) {
+        PhenopacketModel pmodel = (PhenopacketModel) this.model;
+        Optional<LocalDate> bdateOpt = pmodel.getBirthdate();
+        if (bdateOpt.isEmpty()) {
+            PopUps.showInfoMessage("Error", "Cannot add phenotypes without initializing birthdate");
+            return;
+        }
+        Period age = getAge(bdateOpt.get(), encounterDate);
+        List<FenominalTerm> approvedTerms = approved.stream()
+                .map(pterm -> FenominalTerm.fromMainPhenotypeTermWithAge(pterm, age))
+                .sorted()
+                .collect(Collectors.toList());
+        pmodel.addHpoFeatures(approvedTerms);
+        int encountersSoFar = pmodel.casesMined();
+        this.parseButton.setText(String.format("Mine encounter %d", encountersSoFar + 1));
+    }
+
+    private void parsePhenopacketByAge(String isoAge, Set<PhenotypeTerm> approved) {
+        Period agePeriod = Period.parse(isoAge);
+        List<FenominalTerm> approvedTerms = approved.stream()
+                .map(pterm -> FenominalTerm.fromMainPhenotypeTermWithIsoAge(pterm, agePeriod))
+                .sorted()
+                .collect(Collectors.toList());
+        model.addHpoFeatures(approvedTerms);
+        int encountersSoFar = model.casesMined();
+        this.parseButton.setText(String.format("Mine encounter %d", encountersSoFar + 1));
+    }
+
+    private void parsePhenopacketNoAge(Set<PhenotypeTerm> approved) {
+        List<FenominalTerm> approvedTerms = approved.stream()
+                .map(FenominalTerm::fromMainPhenotypeTermNoAge)
+                .sorted()
+                .collect(Collectors.toList());
+        model.addHpoFeatures(approvedTerms);
     }
 
     private void updateTable() {
@@ -327,6 +342,23 @@ public class FenominalMainController {
     }
 
 
+    private void initPhenopacketNoAge() {
+        this.parseButton.setDisable(false);
+        Optional<PatientSexAndId> opt = BirthDatePickerDialog.showDatePickerDialogSI();
+        if (opt.isEmpty()) {
+            PopUps.showInfoMessage("Error", "Could not initialize Phenopacket");
+            return;
+        }
+        PatientSexAndId psid = opt.get();
+        this.parseButton.setText("Mine encounter");
+        this.miningTaskType = PHENOPACKET_NO_AGE;
+        this.model = new PhenopacketNoAgeModel(psid.id(), psid.sex());
+        model.setModelDataItem(HPO_VERSION_KEY, getHpoVersion());
+        model.setModelDataItem(N_CURATED_KEY, "0");
+        populateTableWithData(model.getModelData());
+    }
+
+
     @FXML
     private void getStarted(ActionEvent e) {
         if (! cleanBeforeNewCase()) {
@@ -334,8 +366,10 @@ public class FenominalMainController {
         }
         var phenopacketByBirthDate = new CommandLinksDialog.CommandLinksButtonType("Phenopacket", "Enter data about one individual, multiple time points", false);
         var phenopacketByIso8601Age = new CommandLinksDialog.CommandLinksButtonType("Phenopacket (by age at encounter)", "Enter data about one individual, multiple ages", false);
+        var phenopacketNoAge = new CommandLinksDialog.CommandLinksButtonType("Phenopacket (one encounter, no age)", "Enter data about one individual, no age data", false);
+        var updatePhenopacket = new CommandLinksDialog.CommandLinksButtonType("Update Existing Phenopacket", "Update data in phenopacket", false);
         var cancel = new CommandLinksDialog.CommandLinksButtonType("Cancel", "Go back and do not delete current work", false);
-        CommandLinksDialog dialog = new CommandLinksDialog(phenopacketByBirthDate, phenopacketByIso8601Age, cancel);
+        CommandLinksDialog dialog = new CommandLinksDialog(phenopacketByBirthDate, phenopacketByIso8601Age, phenopacketNoAge, updatePhenopacket, cancel);
         dialog.setTitle("Get started");
         dialog.setHeaderText("Select type of curation");
         dialog.setContentText("Fenominal HPO biocuration to create GA4GH Phenopackets");
@@ -343,17 +377,12 @@ public class FenominalMainController {
         if (opt.isPresent()) {
             ButtonType btype = opt.get();
             switch (btype.getText()) {
-                case "Phenopacket":
-                    initPhenopacket();
-                    break;
-                case "Phenopacket (by age at encounter)":
-                    initPhenopacketWithManualAge();
-                    break;
-                case "Cancel":
+                case "Phenopacket" -> initPhenopacket();
+                case "Phenopacket (by age at encounter)" -> initPhenopacketWithManualAge();
+                case "Phenopacket (one encounter, no age)"-> initPhenopacketNoAge();
+                case "Update Existing Phenopacket" -> updatePhenopacket(e);
+                case "Cancel" -> LOGGER.trace("Canceled operation");
             }
-            // If we are here, then we are starting a new Phenopacket and
-            // we should not offer the update option.
-            this.updatePhenopacketButton.setDisable(true);
         }
         String biocurator = this.pgProperties.getProperty(BIOCURATOR_ID_PROPERTY);
         if (biocurator != null && model != null) {
@@ -402,6 +431,7 @@ public class FenominalMainController {
             switch (this.miningTaskType) {
                 case PHENOPACKET -> phenoOutputter = new PhenopacketJsonOutputter((PhenopacketModel) this.model);
                 case PHENOPACKET_BY_AGE -> phenoOutputter = new PhenopacketByAgeJsonOutputter((PhenopacketByAgeModel) this.model);
+                case PHENOPACKET_NO_AGE -> phenoOutputter = new PhenopacketNoAgeJsonOutputter((PhenopacketNoAgeModel) this.model);
                 default -> phenoOutputter = new ErrorOutputter();
             }
             phenoOutputter.output(writer);
@@ -419,6 +449,7 @@ public class FenominalMainController {
         phenoOutputter = switch (this.miningTaskType) {
             case PHENOPACKET -> new PhenopacketJsonOutputter((PhenopacketModel) this.model);
             case PHENOPACKET_BY_AGE -> new PhenopacketByAgeJsonOutputter((PhenopacketByAgeModel) this.model);
+            case PHENOPACKET_NO_AGE -> new PhenopacketNoAgeJsonOutputter((PhenopacketNoAgeModel) this.model);
             default -> new ErrorOutputter();
         };
         try {
@@ -468,7 +499,7 @@ public class FenominalMainController {
     }
 
     /**
-     * Loads a prexisting Phenopacket and populates the model
+     * Loads a pre-existing Phenopacket and populates the model
      *
      * @param phenopacketImp Importer object
      */
@@ -485,8 +516,7 @@ public class FenominalMainController {
         }
         LocalDate birthdate = opt.get();
         model.setBirthdate(birthdate);
-        model.setModelDataItem(HPO_VERSION_KEY, getHpoVersion());
-        model.setModelDataItem(PATIENT_ID_KEY, phenopacketImp.getId());
+        updateModelForPhenopacketUpdate(phenopacketImp.getId());
         populateTableWithData(model.getModelData());
     }
 
@@ -501,16 +531,45 @@ public class FenominalMainController {
         this.miningTaskType = PHENOPACKET;
 
         this.model = new PhenopacketByAgeModel(phenopacketImp);
-        model.setModelDataItem(HPO_VERSION_KEY, getHpoVersion());
-        model.setModelDataItem(PATIENT_ID_KEY, phenopacketImp.getId());
+        updateModelForPhenopacketUpdate(phenopacketImp.getId());
         populateTableWithData(model.getModelData());
     }
+
+    /**
+     * Loads a prexisting Phenopacket and populates the model
+     *
+     * @param phenopacketImp Importer object
+     */
+    private void loadPhenopacketNoAge(PhenopacketImporter phenopacketImp) {
+        this.parseButton.setDisable(false);
+        this.parseButton.setText("Mine");
+        this.miningTaskType = PHENOPACKET_NO_AGE;
+
+        this.model = new PhenopacketNoAgeModel(phenopacketImp);
+        updateModelForPhenopacketUpdate(phenopacketImp.getId());
+        populateTableWithData(model.getModelData());
+    }
+
+
+    public void updateModelForPhenopacketUpdate(String phenopacketID) {
+        model.setModelDataItem(HPO_VERSION_KEY, getHpoVersion());
+        model.setModelDataItem(PATIENT_ID_KEY, phenopacketID);
+        model.setModelDataItem(UPDATE_KEY, "true");
+        int termCount = model.getTermCount();
+        model.setModelDataItem(TERM_COUNT_KEY, String.valueOf(termCount));
+        String biocurator = this.pgProperties.getProperty(BIOCURATOR_ID_PROPERTY);
+        if (biocurator != null) {
+            this.model.setModelDataItem(BIOCURATOR_ID_PROPERTY, biocurator);
+        }
+    }
+
 
     public void updatePhenopacket(ActionEvent actionEvent) {
         var phenopacketByBirthDate = new CommandLinksDialog.CommandLinksButtonType("Phenopacket", "Enter age via brithdate/encounter date", false);
         var phenopacketByIso8601Age = new CommandLinksDialog.CommandLinksButtonType("Phenopacket (by age at encounter)", "Enter dage directly", false);
+        var phenopacketNoAge = new CommandLinksDialog.CommandLinksButtonType("Phenopacket (one encounter, no age)", "Enter data about one individual, no age data", false);
         var cancel = new CommandLinksDialog.CommandLinksButtonType("Cancel", "Cancel", false);
-        CommandLinksDialog dialog = new CommandLinksDialog(phenopacketByBirthDate, phenopacketByIso8601Age, cancel);
+        CommandLinksDialog dialog = new CommandLinksDialog(phenopacketByBirthDate, phenopacketByIso8601Age, phenopacketNoAge, cancel);
         dialog.setTitle("Update Phenopacket");
         dialog.setHeaderText("Select type of curation");
 
@@ -524,25 +583,21 @@ public class FenominalMainController {
             }
             ButtonType btype = opt.get();
             switch (btype.getText()) {
-                case "Phenopacket":
+                case "Phenopacket" -> {
                     loadPhenopacket(optpp.get());
                     this.miningTaskType = PHENOPACKET;
-                    break;
-                case "Phenopacket (by age at encounter)":
+                }
+                case "Phenopacket (by age at encounter)" -> {
                     loadPhenopacketWithManualAge(optpp.get());
                     this.miningTaskType = PHENOPACKET_BY_AGE;
-                    break;
-                case "Cancel":
-                default:
-                    return;
+                }
+                case "Phenopacket (one encounter, no age)" -> {
+                    loadPhenopacketNoAge(optpp.get());
+                    this.miningTaskType = PHENOPACKET_NO_AGE;
+                }
+                default -> { return; }
             }
         }
-        String biocurator = this.pgProperties.getProperty(BIOCURATOR_ID_PROPERTY);
-        if (biocurator != null) {
-            this.model.setModelDataItem(BIOCURATOR_ID_PROPERTY, biocurator);
-        }
-        // We can only update a phenopacket once, so now disable the button
-        this.updatePhenopacketButton.setDisable(true);
         actionEvent.consume();
     }
 

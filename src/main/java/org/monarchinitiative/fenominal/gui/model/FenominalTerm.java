@@ -57,6 +57,10 @@ public class FenominalTerm implements Comparable<FenominalTerm> {
         return new FenominalTerm(mpt.getTerm(), iso8601period, mpt.isPresent());
     }
 
+    public static FenominalTerm fromMainPhenotypeTermNoAge(PhenotypeTerm mpt) {
+        return new FenominalTerm(mpt.getTerm(), mpt.isPresent());
+    }
+
     @Override
     public int compareTo(FenominalTerm that) {
         return this.term.getName().compareTo(that.term.getName());

@@ -111,6 +111,7 @@ public class Configure {
     /**
      * Initialize GUI elements after processing by FXMLLoader.
      */
+    @SuppressWarnings("EmptyMethod")
     public void initialize() {
         // no-op
     }

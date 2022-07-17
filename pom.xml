@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.monarchinitiative.fenominal</groupId>
-    <version>0.6.1</version>
+    <version>0.6.3</version>
     <artifactId>fenominal-gui</artifactId>
 
     <properties>
@@ -21,7 +21,7 @@
         <javafx.version>18.0.1</javafx.version>
         <phenol.version>2.0.0-RC3</phenol.version>
         <phenopacket.version>1.0.0</phenopacket.version>
-        <protobuf.version>3.14.0</protobuf.version>
+        <protobuf.version>3.21.1</protobuf.version>
         <phenopacket-schema.version>2.0.1</phenopacket-schema.version>
         <spring.version>4.3.8.RELEASE</spring.version>
         <jackson.fasterxml.version>2.13.3</jackson.fasterxml.version>
