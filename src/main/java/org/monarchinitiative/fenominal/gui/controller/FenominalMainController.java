@@ -31,9 +31,6 @@ import org.monarchinitiative.fenominal.gui.io.HpoMenuDownloader;
 import org.monarchinitiative.fenominal.gui.io.PhenopacketImporter;
 import org.monarchinitiative.fenominal.gui.model.*;
 import org.monarchinitiative.fenominal.gui.output.*;
-import org.monarchinitiative.fenominal.gui.questionnaire.PhenoQuestionnaire;
-import org.monarchinitiative.fenominal.gui.questionnaire.QuestionnairePane;
-import org.monarchinitiative.fenominal.gui.questionnaire.phenoitem.PhenoAnswer;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.slf4j.Logger;
@@ -63,7 +60,6 @@ public class FenominalMainController {
     public Button outputButton;
     @FXML
     public Button setupButton;
-    public Button questionnaireButtn;
     @FXML
     private Button updatePhenopacketButton;
 
@@ -123,7 +119,6 @@ public class FenominalMainController {
         this.parseButton.setDisable(true);
         this.previwButton.setDisable(true);
         this.outputButton.setDisable(true);
-        this.questionnaireButtn.setDisable(true);
         Platform.runLater(() ->{
             Scene scene = this.parseButton.getScene();
             scene.getWindow().setOnCloseRequest(ev -> {
@@ -364,7 +359,6 @@ public class FenominalMainController {
         if (biocurator != null && model != null) {
             this.model.setModelDataItem(BIOCURATOR_ID_PROPERTY, biocurator);
         }
-        this.questionnaireButtn.setDisable(false);
         e.consume();
     }
 
@@ -415,7 +409,6 @@ public class FenominalMainController {
             PopUps.showInfoMessage("Could not write to file: " + e.getMessage(), "IO Error");
         }
         this.model.resetChanged(); // we have now saved all unsaved data if we get here.
-        this.questionnaireButtn.setDisable(false);
     }
 
     @FXML
@@ -461,44 +454,6 @@ public class FenominalMainController {
                     "Information");
         }
         event.consume();
-    }
-
-    @FXML
-    private void questionnaire(ActionEvent e) {
-        e.consume();
-        if (this.model == null) {
-            PopUps.showInfoMessage("Error", "Cannot invoke questionnaire before initializing case");
-            return;
-        }
-
-        Ontology hpo = this.optionalResources.getOntology();
-        PhenoQuestionnaire pq = PhenoQuestionnaire.development(hpo);
-        QuestionnairePane qpane = new QuestionnairePane();
-        qpane.setQuestionnaire(pq.getQuestions());
-        int height = pq.getQuestions().size() * 80 + 100;
-        Scene scene = new Scene(qpane, 1200, height);
-        Stage secondary = new Stage();
-        secondary.setTitle("PhenoQuestionnaire");
-        secondary.setScene(scene);
-        secondary.showAndWait();
-        List<PhenoAnswer> answers = qpane.getAnswers();
-        // Transform the PhenoAnswer objects into FenominalTerm objects to add them to our model
-        List<FenominalTerm> fterms = new ArrayList<>();
-        for (PhenoAnswer answer : answers) {
-            if (answer.unknown()) {
-                LOGGER.error("Unknown Phenoanswer passed to controller (should never happen");
-                continue;
-            }
-            fterms.add(new FenominalTerm(answer.term(), answer.observed()));
-            LOGGER.info("Adding fterm {}", answer.term().getName());
-        }
-        LOGGER.info("Adding HPO features from questionnaire, n={}", fterms.size());
-        model.addHpoFeatures(fterms);
-
-
-        updateTable();
-        this.previwButton.setDisable(false);
-        this.outputButton.setDisable(false);
     }
 
 
@@ -586,7 +541,6 @@ public class FenominalMainController {
         if (biocurator != null) {
             this.model.setModelDataItem(BIOCURATOR_ID_PROPERTY, biocurator);
         }
-        this.questionnaireButtn.setDisable(false);
         // We can only update a phenopacket once, so now disable the button
         this.updatePhenopacketButton.setDisable(true);
         actionEvent.consume();
