@@ -518,6 +518,7 @@ public class FenominalMainController {
         model.setBirthdate(birthdate);
         model.setModelDataItem(HPO_VERSION_KEY, getHpoVersion());
         model.setModelDataItem(PATIENT_ID_KEY, phenopacketImp.getId());
+        model.setModelDataItem(UPDATE_KEY, "true");
         populateTableWithData(model.getModelData());
     }
 
@@ -534,14 +535,34 @@ public class FenominalMainController {
         this.model = new PhenopacketByAgeModel(phenopacketImp);
         model.setModelDataItem(HPO_VERSION_KEY, getHpoVersion());
         model.setModelDataItem(PATIENT_ID_KEY, phenopacketImp.getId());
+        model.setModelDataItem(UPDATE_KEY, "true");
         populateTableWithData(model.getModelData());
     }
+
+    /**
+     * Loads a prexisting Phenopacket and populates the model
+     *
+     * @param phenopacketImp Importer object
+     */
+    private void loadPhenopacketNoAge(PhenopacketImporter phenopacketImp) {
+        this.parseButton.setDisable(false);
+        this.parseButton.setText("Mine");
+        this.miningTaskType = PHENOPACKET_NO_AGE;
+
+        this.model = new PhenopacketNoAgeModel(phenopacketImp);
+        model.setModelDataItem(HPO_VERSION_KEY, getHpoVersion());
+        model.setModelDataItem(PATIENT_ID_KEY, phenopacketImp.getId());
+        model.setModelDataItem(UPDATE_KEY, "true");
+        populateTableWithData(model.getModelData());
+    }
+
 
     public void updatePhenopacket(ActionEvent actionEvent) {
         var phenopacketByBirthDate = new CommandLinksDialog.CommandLinksButtonType("Phenopacket", "Enter age via brithdate/encounter date", false);
         var phenopacketByIso8601Age = new CommandLinksDialog.CommandLinksButtonType("Phenopacket (by age at encounter)", "Enter dage directly", false);
+        var phenopacketNoAge = new CommandLinksDialog.CommandLinksButtonType("Phenopacket (one encounter, no age)", "Enter data about one individual, no age data", false);
         var cancel = new CommandLinksDialog.CommandLinksButtonType("Cancel", "Cancel", false);
-        CommandLinksDialog dialog = new CommandLinksDialog(phenopacketByBirthDate, phenopacketByIso8601Age, cancel);
+        CommandLinksDialog dialog = new CommandLinksDialog(phenopacketByBirthDate, phenopacketByIso8601Age, phenopacketNoAge, cancel);
         dialog.setTitle("Update Phenopacket");
         dialog.setHeaderText("Select type of curation");
 
@@ -555,17 +576,19 @@ public class FenominalMainController {
             }
             ButtonType btype = opt.get();
             switch (btype.getText()) {
-                case "Phenopacket":
+                case "Phenopacket" -> {
                     loadPhenopacket(optpp.get());
                     this.miningTaskType = PHENOPACKET;
-                    break;
-                case "Phenopacket (by age at encounter)":
+                }
+                case "Phenopacket (by age at encounter)" -> {
                     loadPhenopacketWithManualAge(optpp.get());
                     this.miningTaskType = PHENOPACKET_BY_AGE;
-                    break;
-                case "Cancel":
-                default:
-                    return;
+                }
+                case "Phenopacket (one encounter, no age)" -> {
+                    loadPhenopacketNoAge(optpp.get());
+                    this.miningTaskType = PHENOPACKET_NO_AGE;
+                }
+                default -> { return; }
             }
         }
         String biocurator = this.pgProperties.getProperty(BIOCURATOR_ID_PROPERTY);
