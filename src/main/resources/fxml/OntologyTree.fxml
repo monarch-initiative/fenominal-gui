@@ -16,7 +16,7 @@
 <?import javafx.scene.web.WebView?>
 
 <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
-      xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
+      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.monarchinitiative.fenominal.gui.hpotextminingwidget.OntologyTree">
     <ScrollPane fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS">
         <SplitPane dividerPositions="0.9" orientation="VERTICAL" prefWidth="400.0">
