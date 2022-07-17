@@ -499,7 +499,7 @@ public class FenominalMainController {
     }
 
     /**
-     * Loads a prexisting Phenopacket and populates the model
+     * Loads a pre-existing Phenopacket and populates the model
      *
      * @param phenopacketImp Importer object
      */
@@ -516,9 +516,7 @@ public class FenominalMainController {
         }
         LocalDate birthdate = opt.get();
         model.setBirthdate(birthdate);
-        model.setModelDataItem(HPO_VERSION_KEY, getHpoVersion());
-        model.setModelDataItem(PATIENT_ID_KEY, phenopacketImp.getId());
-        model.setModelDataItem(UPDATE_KEY, "true");
+        updateModelForPhenopacketUpdate(phenopacketImp.getId());
         populateTableWithData(model.getModelData());
     }
 
@@ -533,9 +531,7 @@ public class FenominalMainController {
         this.miningTaskType = PHENOPACKET;
 
         this.model = new PhenopacketByAgeModel(phenopacketImp);
-        model.setModelDataItem(HPO_VERSION_KEY, getHpoVersion());
-        model.setModelDataItem(PATIENT_ID_KEY, phenopacketImp.getId());
-        model.setModelDataItem(UPDATE_KEY, "true");
+        updateModelForPhenopacketUpdate(phenopacketImp.getId());
         populateTableWithData(model.getModelData());
     }
 
@@ -550,10 +546,21 @@ public class FenominalMainController {
         this.miningTaskType = PHENOPACKET_NO_AGE;
 
         this.model = new PhenopacketNoAgeModel(phenopacketImp);
-        model.setModelDataItem(HPO_VERSION_KEY, getHpoVersion());
-        model.setModelDataItem(PATIENT_ID_KEY, phenopacketImp.getId());
-        model.setModelDataItem(UPDATE_KEY, "true");
+        updateModelForPhenopacketUpdate(phenopacketImp.getId());
         populateTableWithData(model.getModelData());
+    }
+
+
+    public void updateModelForPhenopacketUpdate(String phenopacketID) {
+        model.setModelDataItem(HPO_VERSION_KEY, getHpoVersion());
+        model.setModelDataItem(PATIENT_ID_KEY, phenopacketID);
+        model.setModelDataItem(UPDATE_KEY, "true");
+        int termCount = model.getTermCount();
+        model.setModelDataItem(TERM_COUNT_KEY, String.valueOf(termCount));
+        String biocurator = this.pgProperties.getProperty(BIOCURATOR_ID_PROPERTY);
+        if (biocurator != null) {
+            this.model.setModelDataItem(BIOCURATOR_ID_PROPERTY, biocurator);
+        }
     }
 
 
@@ -590,10 +597,6 @@ public class FenominalMainController {
                 }
                 default -> { return; }
             }
-        }
-        String biocurator = this.pgProperties.getProperty(BIOCURATOR_ID_PROPERTY);
-        if (biocurator != null) {
-            this.model.setModelDataItem(BIOCURATOR_ID_PROPERTY, biocurator);
         }
         actionEvent.consume();
     }

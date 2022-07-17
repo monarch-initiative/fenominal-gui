@@ -25,6 +25,7 @@ public class FenominalConfig {
     public static final String PATIENT_ID_KEY = "patient.id";
     public static final String N_CURATED_KEY = "curated so far";
     public static final String UPDATE_KEY = "update";
+    public static final String TERM_COUNT_KEY = "term count";
     public static final String BIOCURATOR_ID_PROPERTY = "biocurator.id";
 
 
