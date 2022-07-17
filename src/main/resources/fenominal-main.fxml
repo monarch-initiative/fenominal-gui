@@ -71,11 +71,6 @@
                                 <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                             </VBox.margin>
                         </Button>
-                        <Button fx:id="questionnaireButtn" mnemonicParsing="false" onAction="#questionnaire" prefWidth="200.0" styleClass="bevel-grey" stylesheets="@fenominal.css" text="Questionnaire">
-                            <VBox.margin>
-                                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                            </VBox.margin>
-                        </Button>
                         <Button fx:id="previwButton" mnemonicParsing="false" onAction="#previewOutput" prefWidth="200" styleClass="bevel-grey" stylesheets="@fenominal.css" text="Preview output">
                             <VBox.margin>
                                 <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
