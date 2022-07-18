@@ -141,11 +141,14 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>2.7.1</version>
-                <configuration>
+               <!--
+               NOT WORKING - trying to integrate the controlsfx autocomplete tool into
+                             modular app, but this has no effect.
+               <configuration>
                     <jvmArguments>
-                        --add-exports=javafx.base/com.sun.javafx.event=org.controlsfx.controls
+                         dash dash add-exports=javafx.base/com.sun.javafx.event=org.controlsfx.controls
                     </jvmArguments>
-                </configuration>
+                </configuration> -->
             </plugin>
             <plugin>
                 <groupId>org.openjfx</groupId>
