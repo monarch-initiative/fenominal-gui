@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.monarchinitiative.fenominal</groupId>
-    <version>0.6.3</version>
+    <version>0.6.4</version>
     <artifactId>fenominal-gui</artifactId>
 
     <properties>
@@ -141,6 +141,11 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>2.7.1</version>
+                <configuration>
+                    <jvmArguments>
+                        --add-exports=javafx.base/com.sun.javafx.event=org.controlsfx.controls
+                    </jvmArguments>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.openjfx</groupId>

@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 public class PopUps {
 
     /**
-     * See this http://code.makery.ch/blog/javafx-dialogs-official/ to get a bit of inspiration
+     * See this <a href="http://code.makery.ch/blog/javafx-dialogs-official/">...</a> to get a bit of inspiration
      */
 
 
