@@ -250,8 +250,16 @@ public class FenominalMainController {
         String query = "";
 
         try {
-            List<String> lines = Files.readAllLines(Paths.get(file.getAbsolutePath()),
-                    Charset.defaultCharset());
+            // Note that using a buffered reader replaces unmappable characters
+            // while using the Files API led to encoding errors being thrown
+            var br = new BufferedReader(new InputStreamReader(new FileInputStream(file.getAbsolutePath()),"utf-8"));
+            String line;
+            List<String> lines = new ArrayList<>();
+            while ((line = br.readLine()) != null) {
+                LOGGER.info(line.substring(10));
+                lines.add(line);
+            }
+            LOGGER.info("Added {} lines for parsing", lines.size());
             query = String.join(" ", lines);
 
         } catch (IOException e) {
@@ -397,6 +405,7 @@ public class FenominalMainController {
     @FXML
     private void getStarted(ActionEvent e) {
         if (! cleanBeforeNewCase()) {
+            LOGGER.warn("Not clean before new case, returning");
             return;
         }
         var phenopacketByBirthDate = new CommandLinksDialog.CommandLinksButtonType("Phenopacket", "Enter data about one individual, multiple time points", false);
@@ -671,6 +680,9 @@ public class FenominalMainController {
     public boolean cleanBeforeNewCase() {
         if (model == null) {
             return true;
+        } else if (miningTaskType == ALL_TEXT_HITS) {
+            // 'clean' is not relevant for this mining type
+            return true;
         }
         if (model.isChanged()) {
             Dialog<ButtonType> dialog = new Dialog<>();
@@ -690,10 +702,12 @@ public class FenominalMainController {
     }
 
     public boolean shutdown() {
+        LOGGER.trace("shutdown");
         if (model == null) {
+            LOGGER.trace("shutdown with model null");
             return true; // in this case, the use has not started anything and just wants out
-        }
-        if (model.isChanged()) {
+        } else if (model.isChanged()) {
+            LOGGER.trace("shutdown with dirty data, checking with user");
             Dialog<ButtonType> dialog = new Dialog<>();
             dialog.setTitle("Warning - Unsaved Data");
             dialog.setHeaderText("Discard changes?");
@@ -705,8 +719,12 @@ public class FenominalMainController {
             ButtonType btype = opt.get();
             if (btype.equals(ButtonType.CANCEL)) return false;
             return  (btype.equals(ButtonType.YES));
+        } else if (miningTaskType == ALL_TEXT_HITS) {
+            LOGGER.trace("shutdown with all text hits model");
+            return true;
+        } else {
+            PopUps.showInfoMessage("Unexpected error shutting down", "error");
+            return true;
         }
-        // if we get here, somethinbg probably went wrong, let's cancel the quit request
-        return false;
     }
 }
