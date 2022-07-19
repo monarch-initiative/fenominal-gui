@@ -31,6 +31,7 @@ import org.monarchinitiative.fenominal.gui.io.HpoMenuDownloader;
 import org.monarchinitiative.fenominal.gui.io.PhenopacketImporter;
 import org.monarchinitiative.fenominal.gui.model.*;
 import org.monarchinitiative.fenominal.gui.output.*;
+import org.monarchinitiative.fenominal.model.MinedSentence;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.slf4j.Logger;
@@ -40,6 +41,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
@@ -122,7 +126,6 @@ public class FenominalMainController {
                 }
             });
         });
-
         // set up table view
         TableColumn<Map, String> itemColumn = new TableColumn<>("item");
         itemColumn.setCellValueFactory(new MapValueFactory<>("item"));
@@ -171,7 +174,6 @@ public class FenominalMainController {
     @FXML
     private void parseButtonPressed(ActionEvent e) {
         LOGGER.trace("Parse button pressed");
-
         Ontology ontology = this.optionalResources.getOntology();
         if (ontology == null) {
             PopUps.showInfoMessage("Need to set location to hp.json ontology file first! (See edit menu)", "Error");
@@ -194,7 +196,6 @@ public class FenominalMainController {
             AgePickerDialog agePickerDialog = new AgePickerDialog(pAgeModel.getEncounterAges());
             isoAge = agePickerDialog.showAgePickerDialog();
         }
-        //FenominalMinerApp fenominalMiner = new FenominalMinerApp(ontology);
         TermMiner exactMiner = TermMiner.defaultNonFuzzyMapper(ontology);
         HpoTextMining hpoTextMining = HpoTextMining.builder()
                 .withExecutorService(executor)
@@ -203,16 +204,13 @@ public class FenominalMainController {
                 .build();
         // get reference to primary stage
         Window w = this.parseButton.getScene().getWindow();
-
         // show the text mining analysis dialog in the new stage/window
         Stage secondary = new Stage();
         secondary.initOwner(w);
         secondary.setTitle("HPO text mining analysis");
         secondary.setScene(new Scene(hpoTextMining.getMainParent()));
         secondary.showAndWait();
-
         Set<PhenotypeTerm> approved = hpoTextMining.getApprovedTerms();
-
         switch (miningTaskType) {
             case PHENOPACKET -> parsePhenopacket(encounterDate, approved);
             case PHENOPACKET_BY_AGE -> parsePhenopacketByAge(isoAge, approved);
@@ -222,14 +220,51 @@ public class FenominalMainController {
                 return;
             }
         }
-
-
-
         updateTable();
         // if we get here, we have data that could be output
         this.previwButton.setDisable(false);
         this.outputButton.setDisable(false);
         e.consume();
+    }
+
+    /**
+     * Get all text hits from a file with lines. Show the hits and their position in
+     * the sentences.
+     */
+    private void getAllTextHits() {
+        Ontology ontology = optionalResources.getOntology();
+        if (ontology == null) {
+            PopUps.showInfoMessage("Error", "Could not retrieve ontology");
+            return;
+        }
+
+        TermMiner miner = TermMiner.defaultNonFuzzyMapper(ontology);
+        LOGGER.info("Choose file to get all text hits");
+        FileChooser fileChooser = new FileChooser();
+        Stage stage = (Stage) this.outputButton.getScene().getWindow();
+        File file = fileChooser.showOpenDialog(stage);
+        if (file == null) {
+            PopUps.showInfoMessage("Could not retrieve file for parsing, please try again.", "Error");
+            return;
+        }
+        String query = "";
+
+        try {
+            List<String> lines = Files.readAllLines(Paths.get(file.getAbsolutePath()),
+                    Charset.defaultCharset());
+            query = String.join(" ", lines);
+
+        } catch (IOException e) {
+            PopUps.showException("Error", "Could not read input file",
+                    e.getMessage(), e);
+            return;
+        }
+        Collection<MinedSentence> sentences = miner.mineSentences(query);
+        this.model = new AllTextHitsModel(sentences);
+        this.parseButton.setDisable(true);
+        this.previwButton.setDisable(false);
+        this.outputButton.setDisable(false);
+        this.miningTaskType = ALL_TEXT_HITS;
     }
 
 
@@ -368,8 +403,9 @@ public class FenominalMainController {
         var phenopacketByIso8601Age = new CommandLinksDialog.CommandLinksButtonType("Phenopacket (by age at encounter)", "Enter data about one individual, multiple ages", false);
         var phenopacketNoAge = new CommandLinksDialog.CommandLinksButtonType("Phenopacket (one encounter, no age)", "Enter data about one individual, no age data", false);
         var updatePhenopacket = new CommandLinksDialog.CommandLinksButtonType("Update Existing Phenopacket", "Update data in phenopacket", false);
+        var allTextHits = new CommandLinksDialog.CommandLinksButtonType("Show all HPO terms and context", "Show detailed concept recognition results", false);
         var cancel = new CommandLinksDialog.CommandLinksButtonType("Cancel", "Go back and do not delete current work", false);
-        CommandLinksDialog dialog = new CommandLinksDialog(phenopacketByBirthDate, phenopacketByIso8601Age, phenopacketNoAge, updatePhenopacket, cancel);
+        CommandLinksDialog dialog = new CommandLinksDialog(phenopacketByBirthDate, phenopacketByIso8601Age, phenopacketNoAge, updatePhenopacket, allTextHits, cancel);
         dialog.setTitle("Get started");
         dialog.setHeaderText("Select type of curation");
         dialog.setContentText("Fenominal HPO biocuration to create GA4GH Phenopackets");
@@ -381,6 +417,7 @@ public class FenominalMainController {
                 case "Phenopacket (by age at encounter)" -> initPhenopacketWithManualAge();
                 case "Phenopacket (one encounter, no age)"-> initPhenopacketNoAge();
                 case "Update Existing Phenopacket" -> updatePhenopacket(e);
+                case "Show all HPO terms and context" -> getAllTextHits();
                 case "Cancel" -> LOGGER.trace("Canceled operation");
             }
         }
@@ -432,6 +469,14 @@ public class FenominalMainController {
                 case PHENOPACKET -> phenoOutputter = new PhenopacketJsonOutputter((PhenopacketModel) this.model);
                 case PHENOPACKET_BY_AGE -> phenoOutputter = new PhenopacketByAgeJsonOutputter((PhenopacketByAgeModel) this.model);
                 case PHENOPACKET_NO_AGE -> phenoOutputter = new PhenopacketNoAgeJsonOutputter((PhenopacketNoAgeModel) this.model);
+                case ALL_TEXT_HITS ->  {
+                    Ontology ontology = optionalResources.getOntology();
+                    if (ontology == null) {
+                        LOGGER.info("Ontology null, skipping generation of all text hits file");
+                        return;
+                    }
+                    phenoOutputter = new AllTextHitsOutputter((AllTextHitsModel)this.model, ontology);
+                }
                 default -> phenoOutputter = new ErrorOutputter();
             }
             phenoOutputter.output(writer);
@@ -446,10 +491,12 @@ public class FenominalMainController {
         PhenoOutputter phenoOutputter;
         LOGGER.info("preview output");
         Writer writer = new StringWriter();
+        Ontology ontology = optionalResources.getOntology();
         phenoOutputter = switch (this.miningTaskType) {
             case PHENOPACKET -> new PhenopacketJsonOutputter((PhenopacketModel) this.model);
             case PHENOPACKET_BY_AGE -> new PhenopacketByAgeJsonOutputter((PhenopacketByAgeModel) this.model);
             case PHENOPACKET_NO_AGE -> new PhenopacketNoAgeJsonOutputter((PhenopacketNoAgeModel) this.model);
+            case ALL_TEXT_HITS -> new AllTextHitsOutputter((AllTextHitsModel) this.model, ontology);
             default -> new ErrorOutputter();
         };
         try {

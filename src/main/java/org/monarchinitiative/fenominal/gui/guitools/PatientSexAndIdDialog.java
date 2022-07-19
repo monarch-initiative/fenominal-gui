@@ -54,33 +54,4 @@ public class PatientSexAndIdDialog {
 
         return dialog.showAndWait();
     }
-
-
-
-
-    /*
-
-
-
-        DatePicker datePicker = new DatePicker(LocalDate.now());
-        ObservableList<Venue> options =
-            FXCollections.observableArrayList(Venue.values());
-        ComboBox<Venue> comboBox = new ComboBox<>(options);
-        comboBox.getSelectionModel().selectFirst();
-        dialogPane.setContent(new VBox(8, textField, datePicker, comboBox));
-        Platform.runLater(textField::requestFocus);
-        dialog.setResultConverter((ButtonType button) -> {
-            if (button == ButtonType.OK) {
-                return new Results(textField.getText(),
-                    datePicker.getValue(), comboBox.getValue());
-            }
-            return null;
-        });
-        Optional<Results> optionalResult = dialog.showAndWait();
-        optionalResult.ifPresent((Results results) -> {
-            System.out.println(
-                results.text + " " + results.date + " " + results.venue);
-        });
-     */
-
 }
