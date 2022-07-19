@@ -115,7 +115,8 @@ public class HpoTextMining {
         this.present = new Present(presentSignal, termId -> ontologyTree.focusOnTerm(ontology.getTermMap().get(termId)));
 
         // Set up "OntologyTree" part of the screen
-        Consumer<PhenotypeTerm> addHook = (main::addPhenotypeTerm);
+        // This function gets called when the user selects an HPO term
+        Consumer<PhenotypeTerm> addHook = main::addPhenotypeTerm;
         this.ontologyTree = new OntologyTree(ontology, addHook);
 
         // Simple controller factory treating controller created above as singletons.
@@ -170,7 +171,7 @@ public class HpoTextMining {
         } catch (NullPointerException npe) {
             LOGGER.error("Could not dereference URL for controllers: {}", npe.getMessage());
         } catch (IOException e) {
-            LOGGER.error("Could not load HPO Textminign widget: {}", e.getMessage());
+            LOGGER.error("Could not load HPO Textmining widget: {}", e.getMessage());
             e.printStackTrace();
         }
 
