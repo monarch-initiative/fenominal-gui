@@ -27,4 +27,6 @@ module org.monarchinitiative.fenominal.gui {
     exports org.monarchinitiative.fenominal.gui.config to spring.beans, spring.context;
     exports org.monarchinitiative.fenominal.gui.controller to spring.beans;
     opens org.monarchinitiative.fenominal.gui.controller to spring.core, javafx.fxml;
+    opens org.monarchinitiative.fenominal.gui.hpotextminingwidget to javafx.fxml;
+
 }
