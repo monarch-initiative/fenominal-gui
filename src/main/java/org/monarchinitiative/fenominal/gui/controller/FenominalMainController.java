@@ -10,6 +10,8 @@ import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.MapValueFactory;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
@@ -41,9 +43,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
@@ -252,7 +252,7 @@ public class FenominalMainController {
         try {
             // Note that using a buffered reader replaces unmappable characters
             // while using the Files API led to encoding errors being thrown
-            var br = new BufferedReader(new InputStreamReader(new FileInputStream(file.getAbsolutePath()),"utf-8"));
+            var br = new BufferedReader(new InputStreamReader(new FileInputStream(file.getAbsolutePath()), StandardCharsets.UTF_8));
             String line;
             List<String> lines = new ArrayList<>();
             while ((line = br.readLine()) != null) {
@@ -726,5 +726,32 @@ public class FenominalMainController {
             PopUps.showInfoMessage("Unexpected error shutting down", "error");
             return true;
         }
+    }
+
+    /**
+     * Create python code to use with pyphetools notebooks.
+     */
+    public void pyphetoolsAction(ActionEvent e) {
+        e.consume();
+
+        PhenoOutputter phenoOutputter;
+        LOGGER.info("preview output");
+        Writer writer = new StringWriter();
+        Ontology ontology = optionalResources.getOntology();
+        phenoOutputter = switch (this.miningTaskType) {
+            //case PHENOPACKET -> new PhenopacketJsonOutputter((PhenopacketModel) this.model);
+            case PHENOPACKET_BY_AGE -> new PhenopacketByAgeJsonOutputter((PhenopacketByAgeModel) this.model);
+           // case PHENOPACKET_NO_AGE -> new PhenopacketNoAgeJsonOutputter((PhenopacketNoAgeModel) this.model);
+            //case ALL_TEXT_HITS -> new AllTextHitsOutputter((AllTextHitsModel) this.model, ontology);
+            default -> new ErrorOutputter();
+        };
+
+        String pyphetoolsCode = phenoOutputter.getPyphetoolsCode();
+        //System.out.println(pyphetoolsCode);
+        Clipboard clipboard = Clipboard.getSystemClipboard();
+        ClipboardContent content = new ClipboardContent();
+        content.putString(pyphetoolsCode);
+        clipboard.setContent(content);
+        LOGGER.info("Adding pyphetools code to clipboard: {}...", pyphetoolsCode.substring(0,20));
     }
 }

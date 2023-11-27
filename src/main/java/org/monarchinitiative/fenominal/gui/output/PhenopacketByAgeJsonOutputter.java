@@ -16,10 +16,7 @@ import org.phenopackets.phenopackettools.builder.builders.PhenotypicFeatureBuild
 import org.phenopackets.phenopackettools.builder.builders.Resources;
 import org.phenopackets.phenopackettools.builder.builders.TimeElements;
 import org.phenopackets.schema.v2.Phenopacket;
-import org.phenopackets.schema.v2.core.Individual;
-import org.phenopackets.schema.v2.core.MetaData;
-import org.phenopackets.schema.v2.core.PhenotypicFeature;
-import org.phenopackets.schema.v2.core.Update;
+import org.phenopackets.schema.v2.core.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,9 +24,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.monarchinitiative.fenominal.gui.config.FenominalConfig.BIOCURATOR_ID_PROPERTY;
 import static org.monarchinitiative.fenominal.gui.config.FenominalConfig.HPO_VERSION_KEY;
@@ -73,12 +68,7 @@ public record PhenopacketByAgeJsonOutputter(PhenopacketByAgeModel phenopacketMod
         }
     }
 
-
-
-    @Override
-    public void output(Writer writer) throws IOException {
-        LOGGER.info("Output by age model with {} terms.", phenopacketModel.getTermCount());
-        Map<String, String> data = phenopacketModel.getModelData();
+    Phenopacket getPhenopacket() {
         MetaData meta = getMetaData();
         PhenopacketBuilder builder = PhenopacketBuilder.create(generatePhenopacketId(), meta);
         org.phenopackets.schema.v2.core.Sex sx = switch (phenopacketModel.sex()) {
@@ -115,9 +105,16 @@ public record PhenopacketByAgeJsonOutputter(PhenopacketByAgeModel phenopacketMod
             builder.addPhenotypicFeature(pf); // add feature, one at a time
         }
         builder.individual(subject);
+        return builder.build();
+    }
 
-        // The Phenopacket is now complete and we would like to write it as JSON
-        Phenopacket phenopacket = builder.build();
+
+
+    @Override
+    public void output(Writer writer) throws IOException {
+        LOGGER.info("Output by age model with {} terms.", phenopacketModel.getTermCount());
+        Map<String, String> data = phenopacketModel.getModelData();
+        Phenopacket phenopacket = getPhenopacket();
         String json = JsonFormat.printer().print(phenopacket);
         writer.write(json);
     }
@@ -125,5 +122,56 @@ public record PhenopacketByAgeJsonOutputter(PhenopacketByAgeModel phenopacketMod
     private String generatePhenopacketId() {
         String date = LocalDate.now().toString();
         return date + "-fenominal";
+    }
+
+    /**
+     * Ths goal of this method is to create Python code that can be used in a pyphetools notebook
+     * to create a phenopacket in that framework.
+     * @return pyphetools code as a String
+     */
+    public String getPyphetoolsCode() {
+        Phenopacket phenopacket = getPhenopacket();
+        StringBuilder sb = new StringBuilder();
+        Individual individual = phenopacket.getSubject();
+        String individual_id = individual.getId().replace(" ", "_");
+        sb.append("pfeatures = []\n");
+        for (var pf : phenopacket.getPhenotypicFeaturesList()) {
+            var oclass = pf.getType();
+            String hpo_id = oclass.getId();
+            String hpo_label = oclass.getLabel();
+            String observed = pf.getExcluded() ?  "False" : "True";
+            String age_of_onset = null;
+            if (pf.hasOnset()) {
+                var onset = pf.getOnset();
+                if (onset.hasAge()) {
+                    age_of_onset = onset.getAge().getIso8601Duration();
+                }
+            }
+            String hpTerm;
+            if (age_of_onset != null) {
+                hpTerm = String.format("HpTerm(hpo_id=\"%s\", label=\"%s\", observed=\"%s\", onset=\"%s\")",
+                        hpo_id, hpo_label, observed, age_of_onset);
+            } else {
+                hpTerm = String.format("HpTerm(hpo_id=\"%s\", label=\"%s\", observed=\"%s\")",
+                        hpo_id, hpo_label, observed);
+            }
+            sb.append("pfeatures.append(").append(hpTerm).append(")\n");
+        }
+
+        var phenopacket_sex = individual.getSex();
+        sb.append("individual_").append(individual_id).
+                append(" = Individual(individual_id=\"").
+                append(individual.getId()).
+                append("\"");
+        if (phenopacket_sex != Sex.UNKNOWN_SEX) {
+            sb.append(", sex=\"").append(phenopacket_sex).append("\"");
+        }
+        if (individual.hasTimeAtLastEncounter() &&
+                individual.getTimeAtLastEncounter().hasAge()) {
+            var age = individual.getTimeAtLastEncounter().getAge().getIso8601Duration();
+            sb.append(", age = ").append(age).append("\n");
+        }
+        sb.append(", hpo_terms=pfeatures)\n");
+        return sb.toString();
     }
 }

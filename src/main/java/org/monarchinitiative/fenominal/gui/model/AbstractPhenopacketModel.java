@@ -104,7 +104,7 @@ public class AbstractPhenopacketModel implements TextMiningResultsModel {
 
     @Override
     public int getTermCount() {
-        if (terms.size()==0) return 0;
+        if (terms.isEmpty()) return 0;
         Set<TermId> tids = terms.stream()
                 .map(FenominalTerm::getTerm)
                 .map(Term::id)

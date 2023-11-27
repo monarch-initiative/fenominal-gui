@@ -41,8 +41,8 @@ public class HpoMenuDownloader {
     /**
      * Copy contents of a URL to a file using the {@link URL} class.
      *
-     * This works for the HTTP and the HTTPS protocol and for FTP through a proxy. For plain FTP, we need to use the
-     * passive mode.
+     * <p>This works for the HTTP and the HTTPS protocol and for FTP through a proxy. For plain FTP, we need to use the
+     * passive mode.</p>
      */
     private boolean copyURLToFileThroughURL(URL src, File dest)  {
         // actually copy the file
