@@ -22,11 +22,12 @@ module org.monarchinitiative.fenominal.gui {
     requires spring.core;
 
     exports org.monarchinitiative.fenominal.gui to javafx.graphics, spring.beans, spring.context;
-    opens org.monarchinitiative.fenominal.gui to spring.core;
-    opens org.monarchinitiative.fenominal.gui.config to spring.core;
     exports org.monarchinitiative.fenominal.gui.config to spring.beans, spring.context;
     exports org.monarchinitiative.fenominal.gui.controller to spring.beans;
+
     opens org.monarchinitiative.fenominal.gui.controller to spring.core, javafx.fxml;
     opens org.monarchinitiative.fenominal.gui.hpotextminingwidget to javafx.fxml;
+    opens org.monarchinitiative.fenominal.gui to spring.core;
+    opens org.monarchinitiative.fenominal.gui.config to spring.core;
 
 }
